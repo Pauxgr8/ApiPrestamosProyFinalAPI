@@ -1599,3 +1599,31 @@ BEGIN
     SELECT @@ROWCOUNT AS FilasAfectadas;
 END
 GO
+------------------------
+----------------------
+
+CREATE PROCEDURE sp_Login
+    @Usuario VARCHAR(50),
+    @Contrasena VARCHAR(255)
+AS
+BEGIN
+ 
+    SELECT
+        u.IdUsuario,
+        u.Nombre,
+        u.Usuario,
+        u.IdRol,
+        r.Nombre AS Rol
+    FROM Usuario u
+    INNER JOIN Rol r
+        ON u.IdRol = r.IdRol
+    WHERE u.Usuario = @Usuario
+    AND u.Contrasena = @Contrasena
+    AND u.Activo = 1;
+ 
+END
+GO
+
+EXEC sp_Login
+'admin',
+'12345'

@@ -26,6 +26,8 @@ builder.Services.AddScoped<PreguntaRepository>();
 builder.Services.AddScoped<EncuestaRepository>();
 builder.Services.AddScoped<RespuestaRepository>();
 
+builder.Services.AddScoped<LoginRepository>();
+
 builder.Services.AddControllers();
 
 // Configuración de OpenAPI si es necesario
