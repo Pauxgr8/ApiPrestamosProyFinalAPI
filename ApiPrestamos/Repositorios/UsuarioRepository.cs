@@ -54,6 +54,16 @@ namespace ApiPrestamos.Repositorios
                 new SqlParameter("@UsuarioModificacion", usuario.UsuarioModificacion ?? (object)DBNull.Value),
                 new SqlParameter("@Activo", usuario.Activo)
             };
+            // SOLO PARA PROBAR
+            Console.WriteLine("===== USUARIO =====");
+            Console.WriteLine("IdUsuario: " + usuario.IdUsuario);
+            Console.WriteLine("IdRol: " + usuario.IdRol);
+            Console.WriteLine("Nombre: " + usuario.Nombre);
+            Console.WriteLine("Correo: " + usuario.Correo);
+            Console.WriteLine("Usuario: " + usuario.Usuario);
+            Console.WriteLine("Contraseña: " + usuario.Contrasena);
+            Console.WriteLine("UsuarioModificacion: " + usuario.UsuarioModificacion);
+            Console.WriteLine("Activo: " + usuario.Activo);
 
             await _context.Database.ExecuteSqlRawAsync("EXEC sp_ActualizarUsuario @IdUsuario, @IdRol, @Nombre, @Correo, @Usuario, @Contrasena, @UsuarioModificacion, @Activo", parameters);
         }

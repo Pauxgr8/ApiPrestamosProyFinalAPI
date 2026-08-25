@@ -61,6 +61,19 @@ namespace ApiPrestamos.Repositorios
                 new SqlParameter("@Activo", cliente.Activo)
             };
 
+            // SOLO PARA PROBAR
+            Console.WriteLine("===== CLIENTE =====");
+            Console.WriteLine("IdCliente: " + cliente.IdCliente);
+            Console.WriteLine("Nombre: " + cliente.Nombre);
+            Console.WriteLine("Apellido: " + cliente.Apellido);
+            Console.WriteLine("Correo: " + cliente.Correo);
+            Console.WriteLine("Telefono: " + cliente.Telefono);
+            Console.WriteLine("IdGenero: " + cliente.IdGenero);
+            Console.WriteLine("IdNivelEducativo: " + cliente.IdNivelEducativo);
+            Console.WriteLine("IdRangoEdad: " + cliente.IdRangoEdad);
+            Console.WriteLine("IdRangoIngresos: " + cliente.IdRangoIngresos);
+            Console.WriteLine("UsuarioModificacion: " + cliente.UsuarioModificacion);
+            Console.WriteLine("Activo: " + cliente.Activo);
             await _context.Database.ExecuteSqlRawAsync("EXEC sp_ActualizarCliente @IdCliente, @Nombre, @Apellido, @Correo, @Telefono, @IdGenero, @IdNivelEducativo, @IdRangoEdad, @IdRangoIngresos, @UsuarioModificacion, @Activo", parameters);
         }
 
