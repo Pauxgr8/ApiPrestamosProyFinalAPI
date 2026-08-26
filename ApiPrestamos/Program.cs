@@ -27,6 +27,7 @@ builder.Services.AddScoped<EncuestaRepository>();
 builder.Services.AddScoped<RespuestaRepository>();
 
 builder.Services.AddScoped<LoginRepository>();
+builder.Services.AddScoped<ReporteRepository>();
 
 builder.Services.AddControllers();
 

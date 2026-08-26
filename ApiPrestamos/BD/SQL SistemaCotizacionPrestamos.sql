@@ -1,6 +1,6 @@
 CREATE DATABASE SistemaCotizacionPrestamos;
 GO
---Paula Kevin Roberth
+
 USE SistemaCotizacionPrestamos;
 GO
 
@@ -1627,3 +1627,854 @@ GO
 EXEC sp_Login
 'admin',
 '12345'
+
+--Poblar tabla pregunta
+
+INSERT INTO Pregunta
+(TextoPregunta, Categoria, TipoControl, Obligatoria, Activo, FechaCreacion, UsuarioCreacion)
+VALUES
+('¿Cuál es su género?', 'Datos Generales', 'RadioButtonList', 1, 1, GETDATE(), 'Administrador'),
+ 
+('¿Cuál es su rango de edad?', 'Datos Generales', 'DropDownList', 1, 1, GETDATE(), 'Administrador'),
+ 
+('¿Cuál es su nivel educativo?', 'Datos Generales', 'DropDownList', 1, 1, GETDATE(), 'Administrador'),
+ 
+('¿Cuál es su rango de ingresos mensuales?', 'Datos Generales', 'DropDownList', 1, 1, GETDATE(), 'Administrador'),
+ 
+('¿Qué tipo de préstamo desea solicitar?', 'Tipo Préstamo', 'DropDownList', 1, 1, GETDATE(), 'Administrador'),
+ 
+('¿Qué monto desea solicitar?', 'Monto', 'DropDownList', 1, 1, GETDATE(), 'Administrador'),
+ 
+('¿Qué plazo prefiere?', 'Plazo', 'DropDownList', 1, 1, GETDATE(), 'Administrador'),
+ 
+('¿Qué tasa de interés aceptaría?', 'Tasa', 'DropDownList', 1, 1, GETDATE(), 'Administrador'),
+ 
+('¿Cuál es su capacidad de pago mensual?', 'Capacidad Pago', 'DropDownList', 1, 1, GETDATE(), 'Administrador'),
+ 
+('¿Ha tenido préstamos anteriormente?', 'Historial', 'RadioButtonList', 1, 1, GETDATE(), 'Administrador'),
+ 
+('¿Ha estado en mora anteriormente?', 'Historial', 'RadioButtonList', 1, 1, GETDATE(), 'Administrador'),
+ 
+('¿Cuál es su medio de contratación preferido?', 'Contratación', 'CheckBoxList', 1, 1, GETDATE(), 'Administrador'),
+ 
+('¿Tiene empleo fijo?', 'Laboral', 'RadioButtonList', 1, 1, GETDATE(), 'Administrador'),
+ 
+('¿Cuánto tiempo tiene de laborar?', 'Laboral', 'DropDownList', 1, 1, GETDATE(), 'Administrador'),
+ 
+('¿Posee vivienda propia?', 'Patrimonio', 'RadioButtonList', 1, 1, GETDATE(), 'Administrador'),
+ 
+('¿Tiene otras deudas activas?', 'Finanzas', 'RadioButtonList', 1, 1, GETDATE(), 'Administrador'),
+ 
+('¿Cuántas personas dependen económicamente de usted?', 'Familia', 'DropDownList', 1, 1, GETDATE(), 'Administrador'),
+ 
+('¿Cuenta con un fiador?', 'Garantía', 'RadioButtonList', 1, 1, GETDATE(), 'Administrador'),
+ 
+('¿Acepta recibir promociones por correo?', 'Preferencias', 'RadioButtonList', 1, 1, GETDATE(), 'Administrador'),
+ 
+('¿Desea recibir futuras ofertas de préstamos?', 'Preferencias', 'RadioButtonList', 1, 1, GETDATE(), 'Administrador');
+
+
+--REPORTES 
+USE SistemaCotizacionPrestamos;
+GO
+ 
+CREATE PROCEDURE dbo.sp_ReporteTipoPrestamo
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        TP.Nombre AS TipoPrestamo,
+        COUNT(*) AS Cantidad
+    FROM dbo.Encuesta E
+    INNER JOIN dbo.TipoPrestamo TP
+        ON E.IdTipoPrestamo = TP.IdTipoPrestamo
+    WHERE E.Activo = 1
+    GROUP BY TP.Nombre
+    ORDER BY Cantidad DESC;
+END
+GO
+
+CREATE OR ALTER PROCEDURE sp_ReporteGenero
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        G.Nombre AS Genero,
+        COUNT(*) AS Cantidad
+    FROM Respuesta R
+    INNER JOIN Genero G
+        ON R.Valor = CAST(G.IdGenero AS VARCHAR(10))
+    WHERE R.IdPregunta = 1
+    GROUP BY G.Nombre
+    ORDER BY Cantidad DESC;
+END
+GO
+
+CREATE OR ALTER PROCEDURE sp_ReporteNivelEducativo
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        N.Nombre AS NivelEducativo,
+        COUNT(*) AS Cantidad
+    FROM Respuesta R
+        INNER JOIN NivelEducativo N
+            ON TRY_CAST(R.Valor AS INT)=N.IdNivelEducativo
+    WHERE R.IdPregunta = 3
+    GROUP BY N.Nombre
+    ORDER BY Cantidad DESC;
+END
+GO
+
+CREATE OR ALTER PROCEDURE sp_ReporteRangoEdad
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        RE.Descripcion AS RangoEdad,
+        COUNT(*) AS Cantidad
+    FROM Respuesta R
+        INNER JOIN Pregunta P
+            ON R.IdPregunta = P.IdPregunta
+        INNER JOIN RangoEdad RE
+            ON TRY_CAST(R.Valor AS INT) = RE.IdRangoEdad
+    WHERE P.IdPregunta = 2
+      AND R.Activo = 1
+    GROUP BY RE.Descripcion
+    ORDER BY Cantidad DESC;
+END
+GO
+
+CREATE OR ALTER PROCEDURE sp_ReporteRangoIngresos
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        RI.Descripcion AS RangoIngresos,
+        COUNT(*) AS Cantidad
+    FROM Respuesta R
+        INNER JOIN Pregunta P
+            ON R.IdPregunta = P.IdPregunta
+        INNER JOIN RangoIngresos RI
+            ON TRY_CAST(R.Valor AS INT) = RI.IdRangoIngresos
+    WHERE P.IdPregunta = 4
+      AND R.Activo = 1
+    GROUP BY RI.Descripcion
+    ORDER BY Cantidad DESC;
+END
+GO
+CREATE OR ALTER PROCEDURE sp_ReporteTasaInteres
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        T.Descripcion AS TasaInteres,
+        COUNT(*) AS Cantidad
+    FROM Encuesta E
+    INNER JOIN TasaInteres T
+        ON E.IdTasaInteres = T.IdTasaInteres
+    WHERE E.Activo = 1
+    GROUP BY T.Descripcion
+    ORDER BY Cantidad DESC;
+END
+GO
+
+
+CREATE OR ALTER PROCEDURE sp_ReporteCapacidadPago
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        C.Descripcion AS CapacidadPago,
+        COUNT(*) AS Cantidad
+    FROM Encuesta E
+    INNER JOIN CapacidadPago C
+        ON E.IdCapacidadPago = C.IdCapacidadPago
+    WHERE E.Activo = 1
+    GROUP BY C.Descripcion
+    ORDER BY Cantidad DESC;
+END
+GO
+
+CREATE OR ALTER PROCEDURE sp_ReporteMedioContratacion
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        M.Descripcion AS MedioContratacion,
+        COUNT(*) AS Cantidad
+    FROM Encuesta E
+    INNER JOIN MedioContratacion M
+        ON E.IdMedioContratacion = M.IdMedioContratacion
+    WHERE E.Activo = 1
+    GROUP BY M.Descripcion
+    ORDER BY Cantidad DESC;
+END
+GO
+
+CREATE OR ALTER PROCEDURE sp_ReportePlazo
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        P.Descripcion AS Plazo,
+        COUNT(*) AS Cantidad
+    FROM Encuesta E
+    INNER JOIN Plazo P
+        ON E.IdPlazo = P.IdPlazo
+    WHERE E.Activo = 1
+    GROUP BY P.Descripcion
+    ORDER BY Cantidad DESC;
+END
+GO
+
+CREATE OR ALTER PROCEDURE sp_ReporteCliente
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        C.Nombre AS Cliente,
+        COUNT(*) AS Cantidad
+    FROM Encuesta E
+    INNER JOIN Cliente C
+        ON E.IdCliente = C.IdCliente
+    WHERE E.Activo = 1
+    GROUP BY C.Nombre
+    ORDER BY Cantidad DESC;
+END
+GO
+
+CREATE OR ALTER PROCEDURE sp_P1_TipoPrestamoPorRangoEdad
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        RE.Descripcion AS RangoEdad,
+        TP.Nombre AS TipoPrestamo,
+        COUNT(*) AS Cantidad
+    FROM Encuesta E
+    INNER JOIN Cliente C
+        ON E.IdCliente = C.IdCliente
+    INNER JOIN RangoEdad RE
+        ON C.IdRangoEdad = RE.IdRangoEdad
+    INNER JOIN TipoPrestamo TP
+        ON E.IdTipoPrestamo = TP.IdTipoPrestamo
+    WHERE E.Activo = 1
+    GROUP BY
+        RE.Descripcion,
+        TP.Nombre
+    ORDER BY
+        RE.Descripcion,
+        Cantidad DESC;
+END
+GO
+
+CREATE OR ALTER PROCEDURE sp_P2_PlazoIngresosAltos
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        P.Descripcion AS Plazo,
+        COUNT(*) AS Cantidad
+    FROM Encuesta E
+    INNER JOIN Cliente C
+        ON E.IdCliente = C.IdCliente
+    INNER JOIN RangoIngresos RI
+        ON C.IdRangoIngresos = RI.IdRangoIngresos
+    INNER JOIN Plazo P
+        ON E.IdPlazo = P.IdPlazo
+    WHERE RI.IngresoMinimo >= 2000000
+    GROUP BY P.Descripcion
+    ORDER BY Cantidad DESC;
+END
+GO
+
+CREATE OR ALTER PROCEDURE sp_P3_PlazosMayores36
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        'Más de 36 meses' AS Categoria,
+        CAST(
+            SUM(CASE WHEN P.Meses > 36 THEN 1 ELSE 0 END) * 100.0 /
+            COUNT(*) AS DECIMAL(10,2)
+        ) AS Porcentaje
+    FROM Encuesta E
+    INNER JOIN Plazo P
+        ON E.IdPlazo = P.IdPlazo;
+END
+GO
+
+CREATE OR ALTER PROCEDURE sp_P5_IngresosBajosTasaAlta
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        RI.Descripcion AS RangoIngresos,
+        COUNT(*) AS Cantidad
+    FROM Encuesta E
+        INNER JOIN Cliente C
+            ON E.IdCliente = C.IdCliente
+        INNER JOIN RangoIngresos RI
+            ON C.IdRangoIngresos = RI.IdRangoIngresos
+        INNER JOIN TasaInteres T
+            ON E.IdTasaInteres = T.IdTasaInteres
+    WHERE
+        C.IdRangoIngresos = 1
+        AND T.TasaMaxima > 10
+    GROUP BY RI.Descripcion;
+END
+GO
+
+CREATE OR ALTER PROCEDURE sp_P6_NivelEducativoPrestamoEducativo
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        N.Nombre AS NivelEducativo,
+        COUNT(*) AS Cantidad
+    FROM Encuesta E
+        INNER JOIN Cliente C
+            ON E.IdCliente = C.IdCliente
+        INNER JOIN NivelEducativo N
+            ON C.IdNivelEducativo = N.IdNivelEducativo
+    WHERE E.IdTipoPrestamo = 4
+    GROUP BY N.Nombre
+    ORDER BY Cantidad DESC;
+END
+GO
+CREATE OR ALTER PROCEDURE sp_P7_MedioContratacionJovenes
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        M.Descripcion AS MedioContratacion,
+        COUNT(*) AS Cantidad
+    FROM Encuesta E
+        INNER JOIN Cliente C
+            ON E.IdCliente = C.IdCliente
+        INNER JOIN MedioContratacion M
+            ON E.IdMedioContratacion = M.IdMedioContratacion
+    WHERE C.IdRangoEdad = 1
+    GROUP BY M.Descripcion
+    ORDER BY Cantidad DESC;
+END
+GO
+
+CREATE OR ALTER PROCEDURE sp_P8_ClientesInactivos
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        COUNT(*) AS Cantidad
+    FROM Encuesta E
+        INNER JOIN Cliente C
+            ON E.IdCliente=C.IdCliente
+    WHERE C.Activo=0;
+END
+GO
+
+CREATE OR ALTER PROCEDURE sp_P9_CapacidadPagoEdad
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        RE.Descripcion AS RangoEdad,
+        AVG(CP.PagoMaximo) AS PromedioPago
+    FROM Encuesta E
+        INNER JOIN Cliente C
+            ON E.IdCliente=C.IdCliente
+        INNER JOIN RangoEdad RE
+            ON C.IdRangoEdad=RE.IdRangoEdad
+        INNER JOIN CapacidadPago CP
+            ON E.IdCapacidadPago=CP.IdCapacidadPago
+    GROUP BY RE.Descripcion
+    ORDER BY PromedioPago DESC;
+END
+
+CREATE OR ALTER PROCEDURE sp_P10_PrestamoPlazo
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        TP.Nombre AS TipoPrestamo,
+        P.Descripcion AS Plazo,
+        COUNT(*) AS Cantidad
+    FROM Encuesta E
+        INNER JOIN TipoPrestamo TP
+            ON E.IdTipoPrestamo=TP.IdTipoPrestamo
+        INNER JOIN Plazo P
+            ON E.IdPlazo=P.IdPlazo
+    GROUP BY TP.Nombre,P.Descripcion
+    ORDER BY Cantidad DESC;
+END
+GO
+
+CREATE OR ALTER PROCEDURE sp_P11_TasaPromedioIngreso
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        RI.Descripcion AS RangoIngresos,
+        AVG((T.TasaMinima + T.TasaMaxima)/2.0) AS PromedioTasa
+    FROM Encuesta E
+        INNER JOIN Cliente C
+            ON E.IdCliente = C.IdCliente
+        INNER JOIN RangoIngresos RI
+            ON C.IdRangoIngresos = RI.IdRangoIngresos
+        INNER JOIN TasaInteres T
+            ON E.IdTasaInteres = T.IdTasaInteres
+    GROUP BY RI.Descripcion
+    ORDER BY PromedioTasa DESC;
+END
+GO
+
+CREATE OR ALTER PROCEDURE sp_P12_PrestamoUniversitarios
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        TP.Nombre AS TipoPrestamo,
+        COUNT(*) AS Cantidad
+    FROM Encuesta E
+        INNER JOIN Cliente C
+            ON E.IdCliente=C.IdCliente
+        INNER JOIN TipoPrestamo TP
+            ON E.IdTipoPrestamo=TP.IdTipoPrestamo
+    WHERE C.IdNivelEducativo=4
+    GROUP BY TP.Nombre
+    ORDER BY Cantidad DESC;
+END
+GO
+
+CREATE OR ALTER PROCEDURE sp_P13_CapacidadPagoBaja
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        CP.Descripcion,
+        COUNT(*) Cantidad
+    FROM Encuesta E
+        INNER JOIN CapacidadPago CP
+            ON E.IdCapacidadPago=CP.IdCapacidadPago
+    WHERE CP.IdCapacidadPago=1
+    GROUP BY CP.Descripcion;
+END
+GO
+
+CREATE OR ALTER PROCEDURE sp_P14_EdadPrestamo
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        RE.Descripcion AS Edad,
+        TP.Nombre AS Prestamo,
+        COUNT(*) Cantidad
+    FROM Encuesta E
+        INNER JOIN Cliente C
+            ON E.IdCliente=C.IdCliente
+        INNER JOIN RangoEdad RE
+            ON C.IdRangoEdad=RE.IdRangoEdad
+        INNER JOIN TipoPrestamo TP
+            ON E.IdTipoPrestamo=TP.IdTipoPrestamo
+    GROUP BY RE.Descripcion,TP.Nombre
+    ORDER BY Cantidad DESC;
+END
+GO
+ 
+ CREATE OR ALTER PROCEDURE sp_P15_RangoIngresosSolicitudes
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        RI.Descripcion,
+        COUNT(*) Cantidad
+    FROM Encuesta E
+        INNER JOIN Cliente C
+            ON E.IdCliente=C.IdCliente
+        INNER JOIN RangoIngresos RI
+            ON C.IdRangoIngresos=RI.IdRangoIngresos
+    GROUP BY RI.Descripcion
+    ORDER BY Cantidad DESC;
+END
+GO
+ 
+ CREATE OR ALTER PROCEDURE sp_P16_MedioTipoPrestamo
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        M.Descripcion AS Medio,
+        TP.Nombre AS Prestamo,
+        COUNT(*) Cantidad
+    FROM Encuesta E
+        INNER JOIN MedioContratacion M
+            ON E.IdMedioContratacion=M.IdMedioContratacion
+        INNER JOIN TipoPrestamo TP
+            ON E.IdTipoPrestamo=TP.IdTipoPrestamo
+    GROUP BY M.Descripcion,TP.Nombre
+    ORDER BY Cantidad DESC;
+END
+GO
+ 
+ CREATE OR ALTER PROCEDURE sp_P17_MujeresPrestamoPersonal
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        CAST(
+            COUNT(*)*100.0/
+            (SELECT COUNT(*)
+             FROM Encuesta E2
+             INNER JOIN Cliente C2
+                 ON E2.IdCliente=C2.IdCliente
+             WHERE C2.IdGenero=2)
+        AS DECIMAL(10,2)) AS Porcentaje
+    FROM Encuesta E
+        INNER JOIN Cliente C
+            ON E.IdCliente=C.IdCliente
+    WHERE
+        C.IdGenero=2
+        AND E.IdTipoPrestamo=1;
+END
+GO
+ 
+ CREATE OR ALTER PROCEDURE sp_P18_Plazos24
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        P.Descripcion,
+        COUNT(*) Cantidad
+    FROM Encuesta E
+        INNER JOIN Plazo P
+            ON E.IdPlazo=P.IdPlazo
+    WHERE P.Meses<=24
+    GROUP BY P.Descripcion;
+END
+GO
+ 
+ CREATE OR ALTER PROCEDURE sp_P19_DistribucionPrestamo
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        TP.Nombre,
+        COUNT(*) Cantidad
+    FROM Encuesta E
+        INNER JOIN TipoPrestamo TP
+            ON E.IdTipoPrestamo=TP.IdTipoPrestamo
+    GROUP BY TP.Nombre
+    ORDER BY Cantidad DESC;
+END
+GO
+ 
+ CREATE OR ALTER PROCEDURE sp_P20_NivelEducativoSolicitudes
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        N.Nombre,
+        COUNT(*) Cantidad
+    FROM Encuesta E
+        INNER JOIN Cliente C
+            ON E.IdCliente=C.IdCliente
+        INNER JOIN NivelEducativo N
+            ON C.IdNivelEducativo=N.IdNivelEducativo
+    GROUP BY N.Nombre
+    ORDER BY Cantidad DESC;
+END
+GO
+
+ CREATE OR ALTER PROCEDURE sp_P21_TasaAltaPlazoLargo
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        T.Descripcion AS Tasa,
+        P.Descripcion AS Plazo,
+        COUNT(*) AS Cantidad
+    FROM Encuesta E
+        INNER JOIN TasaInteres T
+            ON E.IdTasaInteres = T.IdTasaInteres
+        INNER JOIN Plazo P
+            ON E.IdPlazo = P.IdPlazo
+    WHERE
+        T.TasaMaxima > 12
+        AND P.Meses > 36
+    GROUP BY
+        T.Descripcion,
+        P.Descripcion
+    ORDER BY Cantidad DESC;
+END
+GO
+ 
+ CREATE OR ALTER PROCEDURE sp_P22_Prestamo36a45
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        TP.Nombre,
+        COUNT(*) Cantidad
+    FROM Encuesta E
+        INNER JOIN Cliente C
+            ON E.IdCliente=C.IdCliente
+        INNER JOIN TipoPrestamo TP
+            ON E.IdTipoPrestamo=TP.IdTipoPrestamo
+    WHERE C.IdRangoEdad=3
+    GROUP BY TP.Nombre
+    ORDER BY Cantidad DESC;
+END
+GO
+ 
+
+ CREATE OR ALTER PROCEDURE sp_P23_CapacidadNivel
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        N.Nombre,
+        AVG(CP.PagoMaximo) Promedio
+    FROM Encuesta E
+        INNER JOIN Cliente C
+            ON E.IdCliente=C.IdCliente
+        INNER JOIN NivelEducativo N
+            ON C.IdNivelEducativo=N.IdNivelEducativo
+        INNER JOIN CapacidadPago CP
+            ON E.IdCapacidadPago=CP.IdCapacidadPago
+    GROUP BY N.Nombre
+    ORDER BY Promedio DESC;
+END
+GO
+ 
+
+ CREATE OR ALTER PROCEDURE sp_P24_PlazoIngresosAltos
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        P.Descripcion,
+        COUNT(*) Cantidad
+    FROM Encuesta E
+        INNER JOIN Cliente C
+            ON E.IdCliente=C.IdCliente
+        INNER JOIN Plazo P
+            ON E.IdPlazo=P.IdPlazo
+    WHERE C.IdRangoIngresos=4
+    GROUP BY P.Descripcion
+    ORDER BY Cantidad DESC;
+END
+GO
+ 
+ CREATE OR ALTER PROCEDURE sp_P25_VehicularIngresosAltos
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        RI.Descripcion,
+        COUNT(*) Cantidad
+    FROM Encuesta E
+        INNER JOIN Cliente C
+            ON E.IdCliente=C.IdCliente
+        INNER JOIN RangoIngresos RI
+            ON C.IdRangoIngresos=RI.IdRangoIngresos
+    WHERE
+        C.IdRangoIngresos=4
+        AND E.IdTipoPrestamo=3
+    GROUP BY RI.Descripcion;
+END
+GO
+ 
+
+ CREATE OR ALTER PROCEDURE sp_P26_PrestamoPlazo
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        TP.Nombre,
+        P.Descripcion,
+        COUNT(*) Cantidad
+    FROM Encuesta E
+        INNER JOIN TipoPrestamo TP
+            ON E.IdTipoPrestamo=TP.IdTipoPrestamo
+        INNER JOIN Plazo P
+            ON E.IdPlazo=P.IdPlazo
+    GROUP BY
+        TP.Nombre,
+        P.Descripcion
+    ORDER BY Cantidad DESC;
+END
+GO
+ 
+
+ CREATE OR ALTER PROCEDURE sp_P27_TasaCapacidad
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        T.Descripcion,
+        CP.Descripcion,
+        COUNT(*) Cantidad
+    FROM Encuesta E
+        INNER JOIN TasaInteres T
+            ON E.IdTasaInteres=T.IdTasaInteres
+        INNER JOIN CapacidadPago CP
+            ON E.IdCapacidadPago=CP.IdCapacidadPago
+    GROUP BY
+        T.Descripcion,
+        CP.Descripcion
+    ORDER BY Cantidad DESC;
+END
+GO
+ 
+ CREATE OR ALTER PROCEDURE sp_P28_MedioContratacion
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        M.Descripcion,
+        COUNT(*) Cantidad
+    FROM Encuesta E
+        INNER JOIN MedioContratacion M
+            ON E.IdMedioContratacion=M.IdMedioContratacion
+    GROUP BY M.Descripcion
+    ORDER BY Cantidad DESC;
+END
+GO
+ 
+ CREATE OR ALTER PROCEDURE sp_P29_Plazo12
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        P.Descripcion,
+        COUNT(*) Cantidad
+    FROM Encuesta E
+        INNER JOIN Plazo P
+            ON E.IdPlazo=P.IdPlazo
+    WHERE P.Meses<=12
+    GROUP BY P.Descripcion;
+END
+GO
+ 
+EXEC sp_P29_Plazo12;
+
+CREATE OR ALTER PROCEDURE sp_P30_PerfilComun
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        RE.Descripcion AS Edad,
+        RI.Descripcion AS Ingresos,
+        TP.Nombre AS Prestamo,
+        COUNT(*) AS Cantidad
+    FROM Encuesta E
+        INNER JOIN Cliente C
+            ON E.IdCliente=C.IdCliente
+        INNER JOIN RangoEdad RE
+            ON C.IdRangoEdad=RE.IdRangoEdad
+        INNER JOIN RangoIngresos RI
+            ON C.IdRangoIngresos=RI.IdRangoIngresos
+        INNER JOIN TipoPrestamo TP
+            ON E.IdTipoPrestamo=TP.IdTipoPrestamo
+    GROUP BY
+        RE.Descripcion,
+        RI.Descripcion,
+        TP.Nombre
+    ORDER BY Cantidad DESC;
+END
+GO
+ 
+ CREATE OR ALTER PROCEDURE sp_P3_PlazosMayores36
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        'Más de 36 meses' AS Etiqueta,
+        COUNT(*) AS Valor
+    FROM Encuesta E
+    INNER JOIN Plazo P
+        ON E.IdPlazo = P.IdPlazo
+    WHERE P.Meses > 36
+      AND E.Activo = 1;
+END
+GO
+
+CREATE OR ALTER PROCEDURE sp_P4_MontoPromedioTipoPrestamo
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        TP.Nombre AS Etiqueta,
+        AVG(CP.PagoMaximo) AS Valor
+    FROM Encuesta E
+    INNER JOIN TipoPrestamo TP
+        ON E.IdTipoPrestamo = TP.IdTipoPrestamo
+    INNER JOIN CapacidadPago CP
+        ON E.IdCapacidadPago = CP.IdCapacidadPago
+    WHERE E.Activo = 1
+    GROUP BY TP.Nombre;
+END
+GO
+
+CREATE OR ALTER PROCEDURE sp_P5_IngresosBajosTasaAlta
+AS
+BEGIN
+    SET NOCOUNT ON;
+ 
+    SELECT
+        'Ingresos bajos' AS Etiqueta,
+        COUNT(*) AS Valor
+    FROM Encuesta E
+    INNER JOIN Cliente C
+        ON E.IdCliente = C.IdCliente
+    INNER JOIN RangoIngresos RI
+        ON C.IdRangoIngresos = RI.IdRangoIngresos
+    INNER JOIN TasaInteres TI
+        ON E.IdTasaInteres = TI.IdTasaInteres
+    WHERE RI.IngresoMaximo <= 500000
+      AND TI.TasaMinima > 10
+      AND E.Activo = 1;
+END
+GO
