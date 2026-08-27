@@ -27,7 +27,15 @@ namespace ApiPrestamos.Repositorios
                 new SqlParameter("@UsuarioCreacion", encuesta.UsuarioCreacion),
                 new SqlParameter("@Activo", encuesta.Activo)
             };
-
+            Console.WriteLine("Cliente: " + encuesta.IdCliente);
+            Console.WriteLine("Usuario: " + encuesta.IdUsuario);
+            Console.WriteLine("Tipo: " + encuesta.IdTipoPrestamo);
+            Console.WriteLine("Plazo: " + encuesta.IdPlazo);
+            Console.WriteLine("Tasa: " + encuesta.IdTasaInteres);
+            Console.WriteLine("Capacidad: " + encuesta.IdCapacidadPago);
+            Console.WriteLine("Medio: " + encuesta.IdMedioContratacion);
+            Console.WriteLine("UsuarioCreacion: " + encuesta.UsuarioCreacion);
+            Console.WriteLine("Activo: " + encuesta.Activo);
             await _context.Database.ExecuteSqlRawAsync("EXEC sp_InsertarEncuesta @IdCliente, @IdUsuario, @IdTipoPrestamo, @IdPlazo, @IdTasaInteres, @IdCapacidadPago, @IdMedioContratacion, @UsuarioCreacion, @Activo", parameters);
         }
 
@@ -35,7 +43,14 @@ namespace ApiPrestamos.Repositorios
         {
             return await _context.Encuestas.FromSqlRaw("EXEC sp_ObtenerEncuestas").ToListAsync();
         }
+        public async Task<List<MisEncuestas>> ObtenerMisEncuestas(int idUsuario)
+        {
+            var parametro = new SqlParameter("@IdUsuario", idUsuario);
 
+            return await _context.MisEncuestas
+                .FromSqlRaw("EXEC sp_ObtenerMisEncuestas @IdUsuario", parametro)
+                .ToListAsync();
+        }
         public async Task<Encuesta> LeerEncuestaPorId(int id)
         {
             var parameter = new SqlParameter("@IdEncuesta", id);

@@ -2478,3 +2478,25 @@ BEGIN
       AND E.Activo = 1;
 END
 GO
+ALTER PROCEDURE sp_ObtenerUsuarios
+AS
+BEGIN
+    SELECT
+        u.IdUsuario,
+        u.IdRol,
+        r.Nombre AS NombreRol,
+        u.Nombre,
+        u.Correo,
+        u.Usuario,
+        u.Contrasena,
+        u.Activo,
+        u.FechaCreacion,
+        u.UsuarioCreacion,
+        u.FechaModificacion,
+        u.UsuarioModificacion
+    FROM Usuario u
+        INNER JOIN Rol r
+            ON u.IdRol = r.IdRol
+    WHERE u.Activo = 1
+    ORDER BY u.IdUsuario;
+END

@@ -25,6 +25,7 @@ namespace ApiPrestamos
         public DbSet<Pregunta> Preguntas { get; set; }
         public DbSet<Encuesta> Encuestas { get; set; }
         public DbSet<Respuesta> Respuestas { get; set; }
+        public DbSet<MisEncuestas> MisEncuestas { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -163,6 +164,7 @@ namespace ApiPrestamos
                 .HasForeignKey(x => x.IdPregunta);
 
             base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<MisEncuestas>().HasNoKey();
         }
     }
 }

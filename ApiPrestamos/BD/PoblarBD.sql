@@ -188,3 +188,114 @@ EXEC sp_InsertarEncuesta
 
     @Activo = 1;
  
+ ----rol
+ INSERT INTO Rol
+(
+    Nombre,
+    Descripcion,
+    Activo,
+    FechaCreacion,
+    UsuarioCreacion
+)
+VALUES
+(
+    'Encuestador',
+    'Registro de encuestas',
+    1,
+    GETDATE(),
+    'Sistema'
+);
+INSERT INTO Usuario
+(
+    Correo,
+    IdRol,
+    Nombre,
+    Usuario,
+    Contrasena,
+    Activo,
+    FechaCreacion,
+    UsuarioCreacion
+)
+VALUES
+(
+    'encuestador@prestamos.com',
+    1002,
+   'Juan',
+    'encuestador',
+    '12345',
+    1,
+    GETDATE(),
+    'Sistema'
+);INSERT INTO Usuario
+(
+    Correo,
+    IdRol,
+    Nombre,
+    Usuario,
+    Contrasena,
+    Activo,
+    FechaCreacion,
+    UsuarioCreacion
+)
+VALUES
+(
+    'encuestador@prestamos.com',
+    1002,
+   'Juan',
+    'encuestador',
+    '12345',
+    1,
+    GETDATE(),
+    'Sistema'
+);
+
+---
+
+ALTER PROCEDURE [dbo].[sp_ObtenerMisEncuestas]
+    @IdUsuario INT
+AS
+BEGIN
+ 
+    SELECT
+        E.IdEncuesta,
+        E.FechaEncuesta,
+ 
+        C.Nombre + ' ' + C.Apellido AS Cliente,
+ 
+        TP.Nombre AS TipoPrestamo,
+ 
+        P.Descripcion AS Plazo,
+ 
+        TI.Descripcion AS Tasa,
+ 
+        CP.Descripcion AS CapacidadPago,
+ 
+        MC.Nombre AS MedioContratacion
+ 
+    FROM Encuesta E
+ 
+        INNER JOIN Cliente C
+            ON E.IdCliente = C.IdCliente
+ 
+        INNER JOIN TipoPrestamo TP
+            ON E.IdTipoPrestamo = TP.IdTipoPrestamo
+ 
+        INNER JOIN Plazo P
+            ON E.IdPlazo = P.IdPlazo
+ 
+        INNER JOIN TasaInteres TI
+            ON E.IdTasaInteres = TI.IdTasaInteres
+ 
+        INNER JOIN CapacidadPago CP
+            ON E.IdCapacidadPago = CP.IdCapacidadPago
+ 
+        INNER JOIN MedioContratacion MC
+            ON E.IdMedioContratacion = MC.IdMedioContratacion
+ 
+    WHERE E.IdUsuario = @IdUsuario
+      AND E.Activo = 1
+ 
+    ORDER BY E.FechaEncuesta DESC;
+ 
+END
+GO

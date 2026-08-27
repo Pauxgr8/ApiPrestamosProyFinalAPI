@@ -27,6 +27,13 @@ namespace ApiPrestamos.Controllers
         {
             return await _repository.LeerEncuestas();
         }
+        [HttpGet("mis-encuestas/{idUsuario}")]
+        public async Task<ActionResult<List<MisEncuestas>>> ObtenerMisEncuestas(int idUsuario)
+        {
+            var resultado = await _repository.ObtenerMisEncuestas(idUsuario);
+
+            return Ok(resultado);
+        }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Encuesta>> BuscarEncuestaPorId(int id)
@@ -56,5 +63,6 @@ namespace ApiPrestamos.Controllers
             await _repository.EliminarEncuesta(id, usuarioModificacion);
             return NoContent();
         }
+
     }
 }
