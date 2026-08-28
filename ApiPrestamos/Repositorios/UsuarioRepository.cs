@@ -18,6 +18,7 @@ namespace ApiPrestamos.Repositorios
             var parameters = new[]
             {
                 new SqlParameter("@IdRol", usuario.IdRol),
+               
                 new SqlParameter("@Nombre", usuario.Nombre),
                 new SqlParameter("@Correo", usuario.Correo),
                 new SqlParameter("@Usuario", usuario.Usuario),
@@ -47,6 +48,7 @@ namespace ApiPrestamos.Repositorios
             {
                 new SqlParameter("@IdUsuario", usuario.IdUsuario),
                 new SqlParameter("@IdRol", usuario.IdRol),
+               
                 new SqlParameter("@Nombre", usuario.Nombre),
                 new SqlParameter("@Correo", usuario.Correo),
                 new SqlParameter("@Usuario", usuario.Usuario),
@@ -58,6 +60,7 @@ namespace ApiPrestamos.Repositorios
             Console.WriteLine("===== USUARIO =====");
             Console.WriteLine("IdUsuario: " + usuario.IdUsuario);
             Console.WriteLine("IdRol: " + usuario.IdRol);
+           
             Console.WriteLine("Nombre: " + usuario.Nombre);
             Console.WriteLine("Correo: " + usuario.Correo);
             Console.WriteLine("Usuario: " + usuario.Usuario);
